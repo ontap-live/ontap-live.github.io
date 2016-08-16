@@ -1,0 +1,20 @@
+/* == Fonts == */
+$font-heading:								"Fredericka the Great", serif;
+$font-general:								"Bitter", sans-serif;
+$font-weight-heading:					500;
+$font-weight:									400;
+
+
+/* == Colours == */
+$colour-background: 					#000000;
+$colour-emphasis: 						#ffffff;
+$colour-foreground: 					darken($colour-emphasis, 10%);
+$colour-highlight: 						#ffff00;
+$colour-divider: 						  #665200;
+
+
+/* == Layout == */
+$max-width:										48em;
+
+/* == Breakpoints == */
+$one-column:									"max-width: 32.5em";

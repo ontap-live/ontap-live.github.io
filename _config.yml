@@ -1,0 +1,46 @@
+# Global
+safe:									true
+exclude:							[README.md, LICENSE.md, TODO.md, CNAME]
+include:							[_pages]
+timezone:							Europe/London
+
+# Dependencies
+markdown:							kramdown
+
+# Styling
+sass:
+  sass_dir:						_sass
+  style:							compressed
+
+# Compression
+compress_html:
+  comments:						all
+  clippings:					all
+
+# Permalinks
+permalink:						pretty
+
+# Setup
+title:								"OnTap.live"
+byline:								""
+  
+description:					""
+url:									ontap.live
+baseurl:							/
+author:
+  name:								"OnTap.live"
+  url:								https://github.com/ontap-live
+
+# Custom variables
+version:							"0.0.1"
+launched:							"2016"
+
+# Extras
+analytics:
+  enable:							false
+  id:									""
+
+# APIs
+apis:
+  public:							"MNq4OhTWwO8cKn5U-Fv9O5FUssP2KT1jI"
+  private:						""

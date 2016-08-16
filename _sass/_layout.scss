@@ -1,0 +1,15 @@
+// == Default One Column Padded Layout == //
+body {
+	padding: 0;
+	margin-left: auto;
+	margin-right: auto;
+	width: 100%;
+	max-width: $max-width;
+	position: relative;
+}
+
+// == One Column Small Layout == //
+@media all and (unquote($one-column)) {
+	body > * {margin: 0.5rem 1rem;}
+}
+// == One Column Small Layout == //
