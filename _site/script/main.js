@@ -1,3 +1,7 @@
+// -- Set Up & Parse URL Vars -- //
+var URL_VARS = getUrlVars();
+// -- Set Up & Parse URL Vars -- //
+
 // -- Set Up Public Endpoint -- //
 var PUBLIC_API_URL = "https://script.google.com/macros/s/AKfycbwJdg1jPsWyBbtKolfvR1osqCmrgMX88seDfqwIXC_BBO7QW6o/exec";
 // -- Set Up Public Endpoint -- //
@@ -48,7 +52,7 @@ function callEndpointAPI(method, parameters, callback, messagesOutput) {
 		function : method,
 		parameters : parameters,
 	};
-	if (getUrlVars().dev) request.devMode = true;
+	if (URL_VARS.dev) request.devMode = true;
 
 	var op = gapi.client.request({
 		root : "https://script.googleapis.com",
@@ -155,7 +159,7 @@ function show_Data(data, displayFunction, source) {
 		
 		$("div.meta").remove();
 		
-		if (getUrlVars().debug) {
+		if (URL_VARS && URL_VARS.debug) {
 			
 			var _meta = $("<div/>", {
 				class: "meta"

@@ -18,7 +18,7 @@ function load_Default(parameter) {
 	
 	var url = PUBLIC_API_URL + "?callback=?";
 	if (parameter) url += ("&" + parameter);
-														
+
 	// -- Load Default -- //
 	$.ajax({
 		type: "GET",
@@ -65,7 +65,7 @@ function show_Locations(data) {
 			var location = $("<div/>", {
 				id: value.code,
 				class: "location"
-			}).append($("<h3/>").append($("<a />", {text: value.name, href: "/show?code=" + value.code}))).appendTo("div.content");
+			}).append($("<h3/>").append($("<a />", {text: value.name, href: "/show?code=" + value.code + (URL_VARS && URL_VARS.debug ? "&debug" : "")}))).appendTo("div.content");
 			if (value.logo) location.append($("<img />", {src: value.logo}))
 		})
 	}
