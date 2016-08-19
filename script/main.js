@@ -145,3 +145,33 @@ function getUrlVars()
 	return vars;
 }
 // -- General Methods -- //
+
+// -- Display Methods -- //
+function show_Data(data, displayFunction, source) {
+	
+	if (data) {
+		
+		displayFunction(data);
+		
+		$("div.meta").remove();
+		
+		if (getUrlVars().debug) {
+			
+			var _meta = $("<div/>", {
+				class: "meta"
+			}).appendTo("div.content");
+			
+			if (data.last_update) $("<div />", {
+					id: "last_update",
+					text: "Changed: " + moment(data.last_update).toString()
+				}).appendTo(_meta);
+			
+			if (source) $("<div />", {
+					id: "source",
+					text: "From: " + source
+				}).appendTo(_meta);
+
+		}
+	}
+}
+// -- Display Methods -- //

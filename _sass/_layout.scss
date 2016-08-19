@@ -8,6 +8,12 @@ body {
 	position: relative;
 }
 
+.meta {
+	position: fixed;
+	bottom: 2em;
+	left: 0.5em;
+}
+
 // == One Column Small Layout == //
 @media all and (unquote($one-column)) {
 	body > * {margin: 0.5rem 1rem;}
