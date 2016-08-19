@@ -10,7 +10,7 @@ $(function() {
 	$.ajaxPrefilter(function( options, originalOptions, jqXHR ) {options.async = true;});
 	
 	// -- Run -- //
-	load_Locations();
+	get_Locations();
 	
 });
 
@@ -33,27 +33,41 @@ function load_Default(parameter) {
 	
 }
 
-function load_Locations() {
+function get_Locations() {
 	
 	// -- Load Locations [Locally] -- //
-	localforage.getItem("locations").then(function(local_data) {
-		show_Data(local_data, show_Locations, "Local");
-		
-		// -- Load Locations [Remotely] -- //
-		$.ajax({
-			type: "GET",
-			url: PUBLIC_API_URL + "?action=locations",
-			crossDomain: true,
-			contentType: "application/json; charset=utf-8",
-			dataType: "jsonp", 
-			success: function(data) {
-				if (data && (!local_data || !local_data.last_update || !data.last_update || moment(data.last_update).isAfter(local_data.last_update))) {
-					localforage.setItem("locations", data).then(function(value) {
-						show_Data(data, show_Locations, "Remote");
-					});
-				}
+	localforage.getItem("locations").then(
+		function(local_data) {
+			if (local_data) show_Data(local_data, show_Locations, "Local");
+			load_Locations(local_data ? local_data.last_update : "")
+		}
+	).catch(
+		function(reason) {
+			show_Error(reason);
+			load_Locations();
+		}
+	);
+	
+}
+
+function load_Locations(local_data_updated) {
+	
+	// -- Load Locations [Remotely] -- //
+	$.ajax({
+		type: "GET",
+		url: PUBLIC_API_URL + "?action=locations",
+		crossDomain: true,
+		contentType: "application/json; charset=utf-8",
+		dataType: "jsonp", 
+		success: function(data) {
+			if (data && (!local_data_updated || !data.last_update || moment(data.last_update).isAfter(local_data_updated))) {
+				localforage.setItem("locations", data).then(function(value) {
+					show_Data(data, show_Locations, "Remote");
+				}).catch(function(err) {
+					show_Data(data, show_Locations, "Remote [Set ERR]");
+				});
 			}
-		});
+		}
 	});
 	
 }

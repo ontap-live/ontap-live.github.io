@@ -1,3 +1,9 @@
+// -- Set Up LocalForage -- //
+localforage.config({
+	name : "OnTap.live"
+});
+// -- Set Up LocalForage -- //
+
 // -- Set Up & Parse URL Vars -- //
 var URL_VARS = getUrlVars();
 // -- Set Up & Parse URL Vars -- //
@@ -151,6 +157,24 @@ function getUrlVars()
 // -- General Methods -- //
 
 // -- Display Methods -- //
+function show_Error(err) {
+	
+	$("div.meta").remove();
+		
+	if (URL_VARS && URL_VARS.debug) {
+			
+		var _meta = $("<div/>", {
+			class: "meta"
+		}).appendTo("div.content");
+			
+		if (err) $("<div />", {
+					id: "err",
+					text: "ERR: " + err
+				}).appendTo(_meta);
+
+	}
+}
+
 function show_Data(data, displayFunction, source) {
 	
 	if (data) {

@@ -11,49 +11,38 @@ $(function() {
 	
 	// -- Run -- //
 	var location = getUrlVars().code;
-	if (location) load_Taps(location);
+	if (location) get_Taps(location);
 	
 });
 
-function load_Taps(location) {
+function get_Taps(location) {
 	
-	// -- Load Taps -- //
+	// -- Load Taps [Locally] -- //
+	localforage.getItem("taps__" + location).then(function(local_data) {
+		if (local_data) show_Data(local_data, show_Taps, "Local");
+		load_Taps(location, local_data ? local_data.last_update : "")
+	}).catch(function(reason) {load_Taps(location);});
+	
+}
+
+function load_Taps(location, local_data_updated) {
+	
+	// -- Load Locations [Remotely] -- //
 	$.ajax({
 		type: "GET",
 		url: PUBLIC_API_URL + "?action=show&location=" + location,
 		crossDomain: true,
 		contentType: "application/json; charset=utf-8",
 		dataType: "jsonp", 
-		success: function(data){
-			
-			
-			
-		}
-	});
-	
-}
-
-function load_Taps(location) {
-	
-	// -- Load Taps [Locally] -- //
-	localforage.getItem("taps__" + location).then(function(local_data) {
-		show_Data(local_data, show_Taps, "Local");
-		
-		// -- Load Locations [Remotely] -- //
-		$.ajax({
-			type: "GET",
-			url: PUBLIC_API_URL + "?action=show&location=" + location,
-			crossDomain: true,
-			contentType: "application/json; charset=utf-8",
-			dataType: "jsonp", 
-			success: function(data) {
-				if (data && (!local_data || !local_data.last_update || !data.last_update || moment(data.last_update).isAfter(local_data.last_update))) {
-					localforage.setItem("taps__" + location, data).then(function(value) {
-						show_Data(data, show_Taps, "Remote");
-					});
-				}
+		success: function(data) {
+			if (data && (!local_data_updated || !data.last_update || moment(data.last_update).isAfter(local_data_updated))) {
+				localforage.setItem("taps__" + location, data).then(function() {
+					show_Data(data, show_Taps, "Remote");
+				}).catch(function(err) {
+					show_Data(data, show_Taps, "Remote [Set ERR]");
+				});
 			}
-		});
+		}
 	});
 	
 }
