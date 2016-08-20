@@ -2,6 +2,9 @@
 var _version = {Name : "OnTap.live -> Show", Version : "0.0.1"};
 
 // -- Global Variables -- //
+var _location;
+var _auth = false;
+var _canEdit = false;
 
 // -- Initial Running Method -- //
 $(function() {
@@ -10,8 +13,46 @@ $(function() {
 	$.ajaxPrefilter(function( options, originalOptions, jqXHR ) {options.async = true;});
 	
 	// -- Run -- //
-	var location = getUrlVars().code;
-	if (location) get_Taps(location);
+	_location = getUrlVars().code;
+	if (_location) get_Taps(_location);
+	
+	// -- Auth Handlers -- //
+	startAuthFlow(
+		function(user) {
+			/*
+			user.getId()
+			user.getName()
+			user.getGivenName()
+			user.getFamilyName()
+			user.getImageUrl()
+			user.getEmail()
+			*/
+			_auth = true;
+			$("#login").remove();
+			var logout = $("<a />", {
+				id: "logout",
+				class: "key auth",
+				text: user.getName(),
+				href: "#",
+			}).click(function(e) {e.preventDefault(); return signOut();}).appendTo("div.content");
+			
+			show_EditTaps();
+			
+		},
+		function() {
+			_auth = false
+			_canEdit = false;
+			$("#logout").remove();
+			var login = $("<a />", {
+				id: "login",
+				class: "key auth",
+				text: "Sign In",
+				href: "#",
+			}).click(function(e) {e.preventDefault(); return signIn();}).appendTo("div.content");
+			
+			show_EditTaps();
+		}
+	);
 	
 });
 
@@ -20,14 +61,15 @@ function get_Taps(location) {
 	// -- Load Taps [Locally] -- //
 	localforage.getItem("taps__" + location).then(function(local_data) {
 		if (local_data) show_Data(local_data, show_Taps, "Local");
-		load_Taps(location, local_data ? local_data.last_update : "")
+		load_Taps(location, local_data ? local_data.last_update : "",
+							local_data ? local_data.schema_version : "")
 	}).catch(function(reason) {load_Taps(location);});
 	
 }
 
-function load_Taps(location, local_data_updated) {
+function load_Taps(location, local_data_updated, local_data_schema_version) {
 	
-	// -- Load Locations [Remotely] -- //
+	// -- Load Taps [Remotely] -- //
 	$.ajax({
 		type: "GET",
 		url: PUBLIC_API_URL + "?action=show&location=" + location,
@@ -35,7 +77,11 @@ function load_Taps(location, local_data_updated) {
 		contentType: "application/json; charset=utf-8",
 		dataType: "jsonp", 
 		success: function(data) {
-			if (data && (!local_data_updated || !data.last_update || moment(data.last_update).isAfter(local_data_updated))) {
+			if (data && (!local_data_updated ||
+									 !local_data_schema_version ||
+									 !data.last_update ||
+									 moment(data.last_update).isAfter(local_data_updated) ||
+									 data.schema_version > local_data_schema_version)) {
 				localforage.setItem("taps__" + location, data).then(function() {
 					show_Data(data, show_Taps, "Remote");
 				}).catch(function(err) {
@@ -45,6 +91,48 @@ function load_Taps(location, local_data_updated) {
 		}
 	});
 	
+}
+
+function show_EditTaps() {
+	if (_auth && _location) {
+		if (_canEdit) {
+			mark_EditTaps(_canEdit);
+		} else {
+			callEndpointAPI("canEdit", [_location], function(value) {
+				
+				console.log(value);
+				console.log(value.result);
+				
+				_canEdit = value.result;
+				mark_EditTaps(_canEdit);
+				
+			}, $("output"));
+		}
+	} else {
+		mark_EditTaps(false);
+	}
+}
+
+function mark_EditTaps(editable) {
+	$(".tap").each(function(index, value) {
+		value = $(value);
+		if (editable === true) {
+			value.addClass("editable");
+			var login = $("<a />", {
+				class: "edit",
+				text: "change",
+				href: "#",
+			}).click((function(tap_Id, current_Set) {
+                return function(e) {
+									e.preventDefault();
+									alert("Edit " + tap_Id + " Currently: " + current_Set);
+                };
+            })(value.attr("id"), value.children("h4").first().text())).prependTo(value);
+		} else {
+			value.removeClass("editable");
+			value.children(".edit").remove();
+		}
+	});
 }
 
 function show_Taps(data) {
@@ -60,7 +148,22 @@ function show_Taps(data) {
 			}).append($("<h2/>")
 				.append($("<a />", {text: data.location.name, href: (data.location.url ? data.location.url : "/show?code=" + data.location.code), target: "_new"})))
 				.appendTo("div.content");
-			
+		
+		/*
+		if (data.location.place) {
+			$.ajax({
+				type: "GET",
+				url: PLACES_API_ENDPOINT + "?placeid=" + data.location.place + "&key=" + PLACES_API_KEY,
+				contentType: "application/json; charset=utf-8",
+				dataType: "jsonp",
+				success: function(result) {
+					console.log(result);
+					if (result.result.opening_hours.open_now) {alert("OPEN NOW");}
+				}
+			});
+		}
+		*/
+		
 		$.each(data.taps, function(index, value) {
 			var tap = $("<div/>", {
 				id: value.code,

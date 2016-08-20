@@ -39,7 +39,8 @@ function get_Locations() {
 	localforage.getItem("locations").then(
 		function(local_data) {
 			if (local_data) show_Data(local_data, show_Locations, "Local");
-			load_Locations(local_data ? local_data.last_update : "")
+			load_Locations(local_data ? local_data.last_update : "",
+										 local_data ? local_data.schema_version : "")
 		}
 	).catch(
 		function(reason) {
@@ -50,7 +51,7 @@ function get_Locations() {
 	
 }
 
-function load_Locations(local_data_updated) {
+function load_Locations(local_data_updated, local_data_schema_version) {
 	
 	// -- Load Locations [Remotely] -- //
 	$.ajax({
@@ -60,7 +61,11 @@ function load_Locations(local_data_updated) {
 		contentType: "application/json; charset=utf-8",
 		dataType: "jsonp", 
 		success: function(data) {
-			if (data && (!local_data_updated || !data.last_update || moment(data.last_update).isAfter(local_data_updated))) {
+			if (data && (!local_data_updated || 
+									 !local_data_schema_version ||
+									 !data.last_update ||
+									 moment(data.last_update).isAfter(local_data_updated) ||
+									 data.schema_version > local_data_schema_version)) {
 				localforage.setItem("locations", data).then(function(value) {
 					show_Data(data, show_Locations, "Remote");
 				}).catch(function(err) {

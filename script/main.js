@@ -12,42 +12,63 @@ var URL_VARS = getUrlVars();
 var PUBLIC_API_URL = "https://script.google.com/macros/s/AKfycbwJdg1jPsWyBbtKolfvR1osqCmrgMX88seDfqwIXC_BBO7QW6o/exec";
 // -- Set Up Public Endpoint -- //
 
+// -- Set Up Google Endpoints -- //
+var PLACES_API_ENDPOINT = "https://maps.googleapis.com/maps/api/place/details/json";
+
 // -- Set Up API Google Scopes & IDs -- //
+var API_KEY = "AIzaSyD5XaUbA0MlMFu7tpN3NHY3qbLBcEv0Ih0";
 var API_CLIENT_ID = "1094511926464-6liipv1s2mn8lg1ugcgcn88h8sjdoma2.apps.googleusercontent.com";
 var API_ENDPOINT_ID = "MNq4OhTWwO8cKn5U-Fv9O5FUssP2KT1jI";
-var API_SCOPES = [
-	"https://www.googleapis.com/auth/drive",
-	"https://www.googleapis.com/auth/userinfo.email",
-];
+var API_SCOPES = "profile email https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/userinfo.email";
 // -- Set Up API Google Scopes & IDs -- //
 
 
 // -- Authorisation Methods -- //
-var AUTH_SUCCESS, AUTH_FAILURE, AUTH_LOADED;
-function registerAuthHandlers(success, failure, loaded) {
-	AUTH_SUCCESS = success;
-	AUTH_FAILURE = failure;
-	AUTH_LOADED = loaded;
+
+var AUTH, AUTH_SUCCESS, AUTH_FAILURE; // Methods to call
+
+function startAuthFlow(authorised, unauthorised) {
+	
+	AUTH_SUCCESS = authorised;
+	AUTH_FAILURE = unauthorised;
+
+	// Load the API client and auth library
+	gapi.load("client:auth2", _startAuth);
 }
 
-function checkAuth() {
-	handleAuth(null, true);
+function signIn() {
+	gapi.auth2.getAuthInstance().signIn();
 }
 
-function handleAuth(username, immediate) {
+function signOut() {
+	 gapi.auth2.getAuthInstance().signOut();
+}
 
-	gapi.auth.authorize({
-		client_id : API_CLIENT_ID,
-		scope : API_SCOPES,
-		immediate : !immediate ? false : immediate,
-		user_id : username,
-	}, function(result) {
-		if (result && !result.error && AUTH_SUCCESS) {AUTH_SUCCESS();}
-		else if (AUTH_FAILURE) {AUTH_FAILURE();}
-	}).then(AUTH_LOADED());
+function _startAuth() {
 	
-	return false;
-	
+  gapi.client.setApiKey(API_KEY);
+  AUTH = gapi.auth2.init({
+      client_id: API_CLIENT_ID,
+      scope: API_SCOPES,
+			fetch_basic_profile: true,
+  })
+	AUTH.then(function () {
+    
+		// Listen for changes in 'isSignedIn'
+    gapi.auth2.getAuthInstance().isSignedIn.listen(_updateStatus);
+
+    // Handle the initial sign-in state.
+    _updateStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+		
+  });
+}
+
+function _updateStatus(isAuthenticated) {
+	if (isAuthenticated) {
+    if (AUTH_SUCCESS) AUTH_SUCCESS(AUTH.currentUser.get().getBasicProfile());
+  } else {
+    if (AUTH_FAILURE) AUTH_FAILURE();
+  }
 }
 // -- Authorisation Methods -- //
 
@@ -65,55 +86,52 @@ function callEndpointAPI(method, parameters, callback, messagesOutput) {
 		path : "v1/scripts/" + API_ENDPOINT_ID + ":run",
 		method : "POST",
 		body : request
-	});
-
-	op.execute(function(resp) {
-		handleAPIResponse(resp, callback, messagesOutput);
-	});
-}
-
-function handleAPIResponse(resp, callback, messagesOutput) {
-
-	if (resp.error && resp.error.status) {
-		// API encountered a problem before the script started executing.
-		if (resp.error.status == "UNAUTHENTICATED") {
-			gapi.auth.authorize({
-				client_id : API_CLIENT_ID,
-				scope : API_SCOPES,
-				immediate : true,
-			}, function(result) {
-				if (result && !result.error && AUTH_SUCCESS) {AUTH_SUCCESS()}
-				else if (AUTH_FAILURE) {AUTH_FAILURE(result ? result.error : null)}
-			});
-		} else {
-			showMessages("Error calling API:", messagesOutput);
-			showMessages(JSON.stringify(resp, null, 2), messagesOutput);
-			AUTH_FAILURE();
-		}
-	} else if (resp.error) {
-		// API executed, but the script returned an error.
-		// Extract the first (and only) set of error details.
-		// The values of this object are the script's 'errorMessage' and
-		// 'errorType', and an array of stack trace elements.
-		var error = resp.error.details[0];
-		showMessages('Script error message: ' + error.errorMessage, messagesOutput);
-		if (error.scriptStackTraceElements) {
-			// There may not be a stacktrace if the script didn't start executing.
-			showMessages("Script error stacktrace:", messagesOutput);
-			for (var i = 0; i < error.scriptStackTraceElements.length; i++) {
-				var trace = error.scriptStackTraceElements[i];
-				showMessages('\t' + trace.function+':' + trace.lineNumber, messagesOutput);
+	}).then(function(response) {
+		
+		if (response.result.error) {
+						
+			if (response.result.error.status) {
+				if (response.result.error.status == "UNAUTHENTICATED") {
+					gapi.auth2.getAuthInstance().signIn().then(callEndpointAPI(method, parameters, callback, messagesOutput));
+				} else {
+					showMessages("Error calling API:", messagesOutput);
+					showMessages(JSON.stringify(resp, null, 2), messagesOutput);
+				}
+			} else {
+				var error = response.result.error.details[0];
+				showMessages('Script error message: ' + error.errorMessage, messagesOutput);
+				if (error.scriptStackTraceElements) {
+					// There may not be a stacktrace if the script didn't start executing.
+					showMessages("Script error stacktrace:", messagesOutput);
+					for (var i = 0; i < error.scriptStackTraceElements.length; i++) {
+						var trace = error.scriptStackTraceElements[i];
+						showMessages('\t' + trace.function+':' + trace.lineNumber, messagesOutput);
+					}
+				}
 			}
+			
+		} else {
+			
+			if (getUrlVars().debug) console.log(response.result.response);
+			if (callback) callback(response.result.response);
 		}
-	} else {
-
-		// The structure of the result will depend upon what the Apps Script function returns.
-		if (getUrlVars().debug) console.log(resp.response.result);
-		if (callback) callback(resp.response.result);
-	}
-
+		
+	}, function(reason) {
+		
+		console.log("FAILURE REASON:");
+		console.log(reason);
+		
+		showMessages("Error calling API:", messagesOutput);
+		showMessages(JSON.stringify(resp, null, 2), messagesOutput);
+		
+		
+	});
+	
 }
+// -- API Methods -- //
 
+
+// -- Error Methods -- //
 function showMessages(messages, output) {
 	if (messages &&  typeof messages === "string") messages = [messages];
 	var _output = $("<pre />").appendTo(output.find(".content"));
@@ -122,7 +140,7 @@ function showMessages(messages, output) {
 		_output.text(_output.text() + messages[i] + '\n');
 	}
 }
-// -- API Methods -- //
+// -- Error Methods -- //
 
 
 // -- General Methods -- //
@@ -155,6 +173,7 @@ function getUrlVars()
 	return vars;
 }
 // -- General Methods -- //
+
 
 // -- Display Methods -- //
 function show_Error(err) {
