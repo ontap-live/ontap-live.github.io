@@ -118,9 +118,6 @@ function callEndpointAPI(method, parameters, callback, messagesOutput) {
 		
 	}, function(reason) {
 		
-		console.log("FAILURE REASON:");
-		console.log(reason);
-		
 		showMessages("Error calling API:", messagesOutput);
 		showMessages(JSON.stringify(resp, null, 2), messagesOutput);
 		

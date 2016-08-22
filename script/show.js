@@ -100,9 +100,6 @@ function show_EditTaps() {
 		} else {
 			callEndpointAPI("canEdit", [_location], function(value) {
 				
-				console.log(value);
-				console.log(value.result);
-				
 				_canEdit = value.result;
 				mark_EditTaps(_canEdit);
 				
@@ -122,12 +119,67 @@ function mark_EditTaps(editable) {
 				class: "edit",
 				text: "change",
 				href: "#",
-			}).click((function(tap_Id, current_Set) {
-                return function(e) {
+			}).click((function(tap_Id, current_Set, location) {
+								return function(e) {
 									e.preventDefault();
-									alert("Edit " + tap_Id + " Currently: " + current_Set);
-                };
-            })(value.attr("id"), value.children("h4").first().text())).prependTo(value);
+									
+									callEndpointAPI("options", [location], function(value) {
+										$("#" + tap_Id).children(".edit").hide();
+										var _selector = $("<select />", {id: tap_Id + "_select", class: "taps"});
+										var _replace = $("#" + tap_Id).children("h4").first();
+										_replace.replaceWith(_selector);	
+										_selector.selectize(
+											{
+												placeholder : "What is now on tap?",
+												labelField : "name",
+												sortField: "name",
+												searchField: ["name", "provider"],
+												closeAfterSelect : true,
+												options : value.result.options,
+												render: {
+													item: function(item, escape) {
+														return "<div>" +
+															(item.name ? "<span class='name'>" + escape(item.name) + "</span>" : "") +
+															(item.provider ? "<span class='provider'>" + escape(item.provider) + "</span>" : "") + "</div>";
+													},
+													option: function(item, escape) {
+														var label = item.name || item.provider;
+														var caption = item.name ? item.provider : null;
+														return "<div>" +
+															"<span class='label'>" + escape(label) + "</span>" +
+															(caption ? "<span class='caption'>" + escape(caption) + "</span>" : "") + "</div>";
+													}
+												},
+												create: false,
+												onChange: function(value) {
+													if (!value.length || value == current_Set) return;
+													this.disable();
+													callEndpointAPI("setChange", [location, tap_Id, value], function(value) {
+														if (value.result && value.result !== false) {
+															localforage.setItem("taps__" + location, value.result).then(function() {
+																show_Data(value.result, show_Taps, "Remote / Change");
+																mark_EditTaps(true);
+															}).catch(function(err) {
+																show_Data(value.result, show_Taps, "Remote / Change [Set ERR]");
+																mark_EditTaps(true);
+															});
+														}
+													});
+												}
+											}
+										);
+										var _cancel = $("<a />", {id: tap_Id + "_cancel", text: "cancel", class: "cancel", href: "#"})
+											.click(function(e) {
+													e.preventDefault();
+													$(".selectize-control").remove();
+													_selector.replaceWith(_replace);
+													_cancel.remove();
+													$("#" + tap_Id).children(".edit").show();
+												});
+										$(".selectize-control").after(_cancel);
+									}, $("output"));
+								};
+							})(value.attr("id"), value.children("h4").first().text(), _location)).prependTo(value);
 		} else {
 			value.removeClass("editable");
 			value.children(".edit").remove();

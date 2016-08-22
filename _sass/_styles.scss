@@ -14,13 +14,13 @@ h2 {padding-bottom: 0.5em; border-bottom: 1px dashed darken($colour-emphasis, 60
 // -- Specific Elements -- //
 .tap + .tap {border-top: 1px solid $colour-divider;}
 .cost {font-size: 90%; color: darken($colour-foreground, 20%); font-style: italic; text-align: right;}
-.edit {font-size: 80%; color: $colour-change; float: right; margin-top: 1em;}
+.edit, .cancel {font-size: 80%; color: $colour-change; float: right; margin-top: 1em;}
 .location img {max-width: 3em;}
 .meta {color: $colour-debug; font-size: 60%;}
 // -- Specific Elements -- //
 
 // -- Icons -- //
-.keg, .cask, .key, .edit {
+.keg, .cask, .key, .edit, .cancel {
 	background-repeat: no-repeat;
 	background-size: 1.5em auto;
 	background-position: right center;
@@ -42,4 +42,27 @@ h2 {padding-bottom: 0.5em; border-bottom: 1px dashed darken($colour-emphasis, 60
 .edit {
 	background-image: url('data:image/svg+xml;utf8,<svg version="1.1" viewBox="0.0 0.0 133.33333333333334 133.33333333333334" fill="none" stroke="none" stroke-linecap="square" stroke-miterlimit="10" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><clipPath id="p.0"><path d="m0 0l133.33333 0l0 133.33333l-133.33333 0l0 -133.33333z" clip-rule="nonzero"></path></clipPath><g clip-path="url(#p.0)"><path fill="#000000" fill-opacity="0.0" d="m0 0l133.33333 0l0 133.33333l-133.33333 0z" fill-rule="nonzero"></path><path fill="#ffe599" d="m120.301834 17.031496l-12.679718 31.010427l-4.582672 -4.5826797l-77.33603 77.33603l-9.165356 -9.165352l77.33603 -77.33603l-4.582672 -4.582678z" fill-rule="nonzero"></path><path fill="#ff0000" d="m89.00525 29.480314l18.92913 18.929136l-75.81102 75.842514l-18.929134 -18.92913z" fill-rule="nonzero"></path><path fill="#666666" d="m103.19166 24.172106l17.181099 -7.19685l-7.196846 17.1811z" fill-rule="nonzero"></path></g></svg>'), none;
 }
+
+.cancel {
+	background-image: url('data:image/svg+xml;utf8,<svg version="1.1" viewBox="0.0 0.0 133.33333333333334 133.33333333333334" fill="none" stroke="none" stroke-linecap="square" stroke-miterlimit="10" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><clipPath id="p.0"><path d="m0 0l133.33333 0l0 133.33333l-133.33333 0l0 -133.33333z" clip-rule="nonzero"></path></clipPath><g clip-path="url(#p.0)"><path fill="#000000" fill-opacity="0.0" d="m0 0l133.33333 0l0 133.33333l-133.33333 0z" fill-rule="nonzero"></path><path fill="#ff0000" d="m108.12859 12.918625l12.409447 12.409449l-95.055115 95.08662l-12.40945 -12.409447z" fill-rule="nonzero"></path><path fill="#ff0000" d="m12.794232 25.327045l12.40945 -12.40945l95.08662 95.08662l-12.409454 12.409447z" fill-rule="nonzero"></path></g></svg>'), none;
+}
 // -- Icons -- //
+
+
+.selectize-control.taps .selectize-input [data-value] .email {
+	opacity: 0.5;
+}
+.selectize-control.taps .selectize-input [data-value] .name + .provider {
+	margin-left: 5px;
+}
+.selectize-control.taps .selectize-input [data-value] .provider:before {
+	content: '(';
+}
+.selectize-control.taps .selectize-input [data-value] .provider:after {
+	content: ')';
+}
+.selectize-control.taps .selectize-dropdown .caption {
+	font-size: 12px;
+	display: block;
+	opacity: 0.5;
+}
