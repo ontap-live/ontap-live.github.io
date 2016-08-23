@@ -37,10 +37,9 @@ launched:							"2016"
 
 # Extras
 analytics:
-  enable:							false
-  id:									""
+  enable:							true
+  id:									"UA-53673057-6"
 
 # APIs
 apis:
   public:							"MNq4OhTWwO8cKn5U-Fv9O5FUssP2KT1jI"
-  private:						""
