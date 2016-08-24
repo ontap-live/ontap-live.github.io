@@ -200,6 +200,7 @@ function show_Taps(data) {
 			}).append($("<h2/>")
 				.append($("<a />", {text: data.location.name, href: (data.location.url ? data.location.url : "/show?code=" + data.location.code), target: "_new"})))
 				.appendTo("div.content");
+		document.title = data.location.name + " (OnTap.live)";
 		
 		/*
 		if (data.location.place) {
