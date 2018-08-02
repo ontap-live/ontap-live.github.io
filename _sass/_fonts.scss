@@ -28,6 +28,12 @@ h1, h2, h3, h4, h5, h6 {
 	}
 }
 
+strong {
+  a {
+		&:hover {color: $colour-highlight;}
+	}
+}
+
 h6 {font-size: 100%};
 h5 {font-size: 105%};
 h4 {font-size: 110%};

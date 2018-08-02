@@ -17,6 +17,7 @@ var PLACES_API_ENDPOINT = "https://maps.googleapis.com/maps/api/place/details/js
 
 // -- Set Up API Google Scopes & IDs -- //
 var API_KEY = "AIzaSyD5XaUbA0MlMFu7tpN3NHY3qbLBcEv0Ih0";
+var PLACES_API_KEY = "AIzaSyB6CsXFP1eRHg4fuHpFBE3zUnr1lT2ySkk";
 var API_CLIENT_ID = "1094511926464-p7s53cghiv3j8kns5m052rsrnnnrh6g0.apps.googleusercontent.com";
 var API_ENDPOINT_ID = "MNq4OhTWwO8cKn5U-Fv9O5FUssP2KT1jI";
 var API_SCOPES = "profile email https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/userinfo.email";

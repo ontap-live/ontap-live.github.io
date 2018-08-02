@@ -200,36 +200,41 @@ function show_Taps(data) {
 			}).append($("<h2/>")
 				.append($("<a />", {text: data.location.name, href: (data.location.url ? data.location.url : "/show?code=" + data.location.code), target: "_new"})))
 				.appendTo("div.content");
-		document.title = data.location.name + " (OnTap.live)";
-		
+		document.title = data.location.name + " | OnTap";
+    
 		/*
 		if (data.location.place) {
-			$.ajax({
-				type: "GET",
-				url: PLACES_API_ENDPOINT + "?placeid=" + data.location.place + "&key=" + PLACES_API_KEY,
-				contentType: "application/json; charset=utf-8",
-				dataType: "jsonp",
-				success: function(result) {
-					console.log(result);
-					if (result.result.opening_hours.open_now) {alert("OPEN NOW");}
-				}
-			});
+      try {
+        $.ajax({
+          type: "GET",
+          url: PLACES_API_ENDPOINT + "?placeid=" + data.location.place + "&key=" + PLACES_API_KEY,
+          contentType: "application/json; charset=utf-8",
+          dataType: "jsonp",
+          success: function(result) {
+            console.log(result);
+            if (result.result.opening_hours.open_now) {alert("OPEN NOW");}
+          }
+        });
+      } catch(e) {
+       console.error(e); 
+      }
+			
 		}
-		*/
+    */
 		
 		$.each(data.taps, function(index, value) {
 			var tap = $("<div/>", {
 				id: value.code,
 				class: "tap"
 			}).append($("<h4/>", {})
-				.append($("<a />", {class: value.type.toLowerCase(), text: value.name, href: (value.link ? value.link : value.style_link), target: "_new"})))
+				.append($("<a />", {class: value.type.toLowerCase(), title: value.type, text: value.name, href: (value.link ? value.link : value.style_link), target: "_blank"})))
 				.appendTo("div.content");
 				
 			var _text = "";
 				
 			if (value.style) {
 				if (_text) _text += ". ";
-				_text += "<strong>" + value.style + "</strong>";
+				_text += "<strong>" + (value.style_link ? "<a href='" +  value.style_link + "' target='_blank'>" + value.style + "</a>" : value.style) + "</strong>";
 			}
 				
 			if (value.provider) {
